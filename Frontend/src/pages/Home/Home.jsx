@@ -137,7 +137,7 @@ const HomePage = () => {
       <div className="pro-card search-banner">
         <div className="banner-content">
           <h1 className="title-green">Stock Dashboard</h1>
-          <p className="subtitle">Real-time stock price analysis and historical metrics powered by Django REST APIs</p>
+          <p className="subtitle">Real-time stock price analysis and market metrics</p>
           
           <form onSubmit={handleSearchSubmit} className="search-form">
             <div className="input-group">

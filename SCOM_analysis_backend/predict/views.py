@@ -1,6 +1,7 @@
 import yfinance as yf
 import joblib
 import os
+import pandas as pd
 import numpy as np
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,9 +9,20 @@ from rest_framework import status
 from django.conf import settings
 from .serializers import PredictionInputSerializer, PredictionOutputSerializer
 
+def safe_float(val):
+    if val is None:
+        return None
+    try:
+        if isinstance(val, (pd.Series, np.ndarray)):
+            val = val.iloc[0] if hasattr(val, 'iloc') else val[0]
+        f_val = float(val)
+        return round(f_val, 2) if not np.isnan(f_val) else None
+    except Exception:
+        return None
+
 class PredictStockAPIView(APIView):
     """
-    DRF APIView to generate AI Stock Price Predictions using Random Forest models.
+    DRF APIView to generate Stock Price Predictions using Random Forest models.
     """
     def get(self, request):
         serializer = PredictionInputSerializer(data=request.query_params)
@@ -20,17 +32,16 @@ class PredictStockAPIView(APIView):
         ticker = serializer.validated_data['ticker'].upper()
 
         try:
-            data = yf.download(ticker, period="1y")[['Close', 'Volume']].dropna()
+            stock = yf.Ticker(ticker)
+            data = stock.history(period="1y")
 
-            if len(data) < 4:
+            if data.empty or len(data) < 4:
                 return Response(
                     {'error': f'Insufficient data for ticker {ticker} to compute predictions.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
             close_prices = data['Close']
-            if isinstance(close_prices, str):
-                return Response({'error': 'Invalid close price data format'}, status=status.HTTP_400_BAD_REQUEST)
 
             data['Lag1'] = close_prices.shift(1)
             data['Lag2'] = close_prices.shift(2)
@@ -58,19 +69,23 @@ class PredictStockAPIView(APIView):
                 return Response({'error': 'Trained Random Forest model file (rf_model.pkl) not found. Please train model first.'}, status=status.HTTP_404_NOT_FOUND)
 
             model = joblib.load(model_path)
-            prediction = int(model.predict(input_data)[0])
+            raw_pred = model.predict(input_data)[0]
+            prediction = int(raw_pred.iloc[0] if isinstance(raw_pred, (pd.Series, np.ndarray)) else raw_pred)
+
             probabilities = model.predict_proba(input_data)[0]
+            prob_0 = float(probabilities[0].iloc[0] if isinstance(probabilities[0], (pd.Series, np.ndarray)) else probabilities[0])
+            prob_1 = float(probabilities[1].iloc[0] if isinstance(probabilities[1], (pd.Series, np.ndarray)) else probabilities[1])
 
             response_data = {
                 'ticker': ticker,
                 'prediction': prediction,
                 'signal': 'BULLISH (BUY)' if prediction == 1 else 'BEARISH (SELL)',
-                'probability_class_0': round(float(probabilities[0]), 4),
-                'probability_class_1': round(float(probabilities[1]), 4),
-                'latest_close': round(float(latest_row['Close']), 2),
-                'rsi': round(float(latest_row['RSI']), 2) if not np.isnan(latest_row['RSI']) else None,
-                'sma_20': round(float(latest_row['SMA_20']), 2) if not np.isnan(latest_row['SMA_20']) else None,
-                'sma_50': round(float(latest_row['SMA_50']), 2) if not np.isnan(latest_row['SMA_50']) else None,
+                'probability_class_0': round(prob_0, 4),
+                'probability_class_1': round(prob_1, 4),
+                'latest_close': safe_float(latest_row['Close']),
+                'rsi': safe_float(latest_row['RSI']),
+                'sma_20': safe_float(latest_row['SMA_20']),
+                'sma_50': safe_float(latest_row['SMA_50']),
             }
 
             out_serializer = PredictionOutputSerializer(data=response_data)

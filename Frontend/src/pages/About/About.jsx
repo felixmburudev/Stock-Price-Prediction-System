@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Cpu, Lock, Server, Globe } from 'lucide-react';
+import { ShieldCheck, Cpu, Server, Globe } from 'lucide-react';
 import './About.css';
 
 const About = () => {
@@ -8,7 +8,7 @@ const About = () => {
       <div className="pro-card about-hero">
         <h1 className="title-green">About the System</h1>
         <p className="subtitle">
-          Stock Price Prediction System built with Django REST Framework (DRF) on the backend and React on the frontend.
+          The Stock Price Prediction System is a web application designed to help users analyze stock data and predict price movements using machine learning.
         </p>
       </div>
 
@@ -16,14 +16,11 @@ const About = () => {
         <div className="pro-card spec-card">
           <div className="spec-header">
             <Server className="text-green" size={22} />
-            <h3>Django REST Framework (DRF)</h3>
+            <h3>Django Backend</h3>
           </div>
-          <ul className="spec-list">
-            <li><strong>Backend Framework:</strong> Django REST Framework (DRF)</li>
-            <li><strong>Security:</strong> HTTPS redirection & CSRF security settings</li>
-            <li><strong>Rate Limiting:</strong> IP address request throttling (`120/min` per IP)</li>
-            <li><strong>API Structure:</strong> DRF ViewSets & REST API endpoints</li>
-          </ul>
+          <p className="spec-desc">
+            Powered by a robust Django backend that manages data retrieval, handles API requests, and executes machine learning prediction pipelines efficiently.
+          </p>
         </div>
 
         <div className="pro-card spec-card">
@@ -31,38 +28,19 @@ const About = () => {
             <Cpu className="text-green" size={22} />
             <h3>Machine Learning Model</h3>
           </div>
-          <ul className="spec-list">
-            <li><strong>Model Type:</strong> Random Forest Classifier / Regressor</li>
-            <li><strong>Features:</strong> SMA (20), SMA (50), RSI (14), Lag 1 & Lag 2 returns</li>
-            <li><strong>Persistence:</strong> Joblib model serialization</li>
-            <li><strong>Training:</strong> Single and batch model training workflows</li>
-          </ul>
+          <p className="spec-desc">
+            Utilizes Random Forest algorithms trained on technical indicators such as Moving Averages (SMA) and Relative Strength Index (RSI) to forecast trends.
+          </p>
         </div>
 
         <div className="pro-card spec-card">
           <div className="spec-header">
             <Globe className="text-green" size={22} />
-            <h3>Frontend Terminal</h3>
+            <h3>React Dashboard</h3>
           </div>
-          <ul className="spec-list">
-            <li><strong>Framework:</strong> React + Vite</li>
-            <li><strong>Design System:</strong> Clean White & Green Professional Theme</li>
-            <li><strong>Data Visualization:</strong> Chart.js canvas charting</li>
-            <li><strong>Icons:</strong> Lucide React Vector Icons</li>
-          </ul>
-        </div>
-
-        <div className="pro-card spec-card">
-          <div className="spec-header">
-            <Lock className="text-green" size={22} />
-            <h3>Security & Settings</h3>
-          </div>
-          <ul className="spec-list">
-            <li><strong>Throttling:</strong> DRF `AnonRateThrottle` & `UserRateThrottle`</li>
-            <li><strong>HTTPS Headers:</strong> Strict-Transport-Security (HSTS 1 year)</li>
-            <li><strong>Sniffing Protection:</strong> `X-Content-Type-Options: nosniff`</li>
-            <li><strong>Clickjacking:</strong> `X-Frame-Options: DENY`</li>
-          </ul>
+          <p className="spec-desc">
+            A responsive React interface providing interactive price charts, market indicators, and real-time visualization of stock data.
+          </p>
         </div>
       </div>
 

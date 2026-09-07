@@ -42,17 +42,10 @@
   color: var(--text-primary);
 }
 
-.spec-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+.spec-desc {
+  font-size: 0.95rem;
   color: var(--text-secondary);
-}
-
-.spec-list strong {
-  color: var(--text-primary);
+  line-height: 1.6;
 }
 
 .disclaimer-card {

@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import axios from 'axios';
 import companies from '../../components/Training/companies';
-import { Cpu, ArrowUpCircle, ArrowDownCircle, Activity, Gauge, BarChart3, AlertCircle } from 'lucide-react';
+import { Cpu, ArrowUpCircle, ArrowDownCircle, Activity, Gauge, BarChart3, AlertCircle, Loader2 } from 'lucide-react';
 import './Prediction.css';
 
 ChartJS.register(
@@ -35,6 +35,7 @@ function Prediction() {
   const [predictionData, setPredictionData] = useState(null);
   const [companyData, setCompanyData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCompanyLoading, setIsCompanyLoading] = useState(false);
   const [isPredicting, setIsPredicting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -45,7 +46,10 @@ function Prediction() {
 
     const fetchStockAndCompany = async () => {
       setIsLoading(true);
+      setIsCompanyLoading(true);
       setError(null);
+      setCompanyData(null);
+      setPredictionData(null);
 
       try {
         const stockResp = await axios.get(`http://localhost:8000/api/stock_data/?ticker=${ticker}`);
@@ -63,6 +67,7 @@ function Prediction() {
         setError(`Failed to fetch stock data for ${ticker}`);
       } finally {
         setIsLoading(false);
+        setIsCompanyLoading(false);
       }
     };
 
@@ -139,7 +144,7 @@ function Prediction() {
           <Cpu className="text-green" size={26} />
           <div>
             <h1 className="title-green">Stock Price Prediction</h1>
-            <p className="subtitle">Random Forest machine learning model evaluation via DRF API</p>
+            <p className="subtitle">Machine learning model price prediction</p>
           </div>
         </div>
 
@@ -149,6 +154,7 @@ function Prediction() {
             value={ticker}
             onChange={(e) => setTicker(e.target.value)}
             className="ticker-dropdown"
+            disabled={isLoading || isCompanyLoading}
           >
             {companies.map((c) => (
               <option key={c.symbol} value={c.symbol}>
@@ -159,9 +165,16 @@ function Prediction() {
           <button
             onClick={handlePredict}
             className="btn-primary"
-            disabled={isPredicting || isLoading}
+            disabled={isPredicting || isLoading || isCompanyLoading}
           >
-            {isPredicting ? 'Executing Model...' : 'Run Prediction'}
+            {isPredicting ? (
+              <>
+                <Loader2 className="spin" size={16} />
+                <span>Executing Model...</span>
+              </>
+            ) : (
+              'Run Prediction'
+            )}
           </button>
         </div>
       </div>
@@ -173,8 +186,19 @@ function Prediction() {
         </div>
       )}
 
+      {/* Loading Company Data Indicator UI */}
+      {isCompanyLoading && (
+        <div className="pro-card company-loading-card">
+          <Loader2 className="spin text-green" size={24} />
+          <div>
+            <h4 className="title-green">Loading Company & Market Data...</h4>
+            <p className="text-muted">Fetching latest profile & market history for symbol {ticker}</p>
+          </div>
+        </div>
+      )}
+
       {/* Company Info Banner */}
-      {companyData && (
+      {!isCompanyLoading && companyData && (
         <div className="pro-card company-info-card">
           {companyData.branding?.logo_url && (
             <img
@@ -283,7 +307,7 @@ function Prediction() {
       )}
 
       {/* Projection Chart */}
-      {chartData && (
+      {!isCompanyLoading && chartData && (
         <div className="pro-card chart-card">
           <div className="chart-header">
             <h2>{ticker} Price Movement & Model Prediction Chart</h2>

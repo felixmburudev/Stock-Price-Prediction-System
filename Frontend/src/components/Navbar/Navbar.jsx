@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Cpu, Activity, Info, Menu, X, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Cpu, Activity, Info, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
 function Navbar() {
@@ -27,15 +27,8 @@ function Navbar() {
           </div>
           <div className="brand-text">
             <span className="brand-title">Stock Prediction System</span>
-            <span className="brand-subtitle">Django REST & Machine Learning</span>
           </div>
         </Link>
-
-        {/* Security & System Live Status Badge */}
-        <div className="system-status-badge">
-          <ShieldCheck size={15} />
-          <span>DRF API Rate-Limited (HTTPS Secure)</span>
-        </div>
 
         <button
           className="mobile-toggle"

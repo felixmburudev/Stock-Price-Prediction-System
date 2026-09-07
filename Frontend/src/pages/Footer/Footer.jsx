@@ -12,7 +12,6 @@ const Footer = () => {
         </div>
 
         <div className="footer-right">
-          <span className="badge badge-success">DRF Security Active</span>
           <a
             href="https://github.com/felixmburudev/Safaricom-Stock-Price-Prediction-System/"
             target="_blank"

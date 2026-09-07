@@ -11,7 +11,7 @@ function Training() {
     <div className="training-page">
       <div className="pro-card training-header">
         <h1 className="title-green">Model Training Workbench</h1>
-        <p className="subtitle">Configure parameters and train Random Forest models using backend DRF endpoints</p>
+        <p className="subtitle">Configure parameters and train Random Forest models</p>
 
         {/* Tab Headers */}
         <div className="tab-headers">

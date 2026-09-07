@@ -694,3 +694,8 @@ C:\Users\mburson\Desktop\myproject\SCOM_analysis_backend\data_loader\views.py ch
 Watching for file changes with StatReloader
 C:\Users\mburson\Desktop\myproject\SCOM_analysis_backend\data_loader\views.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /api/predict/
+Internal Server Error: /api/predict/
+C:\projects\Stock-Price-Prediction-System\SCOM_analysis_backend\predict\views.py changed, reloading.
+Watching for file changes with StatReloader
