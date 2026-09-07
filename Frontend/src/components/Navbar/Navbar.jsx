@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { TrendingUp, Cpu, Activity, Info, Menu, X, ShieldCheck } from 'lucide-react';
 import './Navbar.css';
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -11,53 +13,77 @@ function Navbar() {
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Smooth scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <nav className="navbar" role="navigation" aria-label="Main navigation">
+    <header className="navbar-header">
       <div className="navbar-container">
-        <div className="navbar-brand">
-          <Link to="/" onClick={handleLinkClick} aria-label="Home">
-            <h1>Stock Price Prediction System</h1>
-          </Link>
+        <Link to="/" onClick={handleLinkClick} className="navbar-brand">
+          <div className="brand-icon">
+            <TrendingUp size={22} className="text-green" />
+          </div>
+          <div className="brand-text">
+            <span className="brand-title">Stock Prediction System</span>
+            <span className="brand-subtitle">Django REST & Machine Learning</span>
+          </div>
+        </Link>
+
+        {/* Security & System Live Status Badge */}
+        <div className="system-status-badge">
+          <ShieldCheck size={15} />
+          <span>DRF API Rate-Limited (HTTPS Secure)</span>
         </div>
-        
+
         <button
-          className="hamburger-menu"
+          className="mobile-toggle"
           onClick={toggleMobileMenu}
-          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMobileMenuOpen}
+          aria-label="Toggle navigation"
         >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        <ul className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`}>
-          <li>
-            <Link to="/" onClick={handleLinkClick}>
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/training" onClick={handleLinkClick}>
-              Training
-            </Link>
-          </li>
-          <li>
-            <Link to="/predict" onClick={handleLinkClick}>
-              Predict
-            </Link>   
-          </li>
-          <li>
-            <Link to="/about" onClick={handleLinkClick}>
-              About
-            </Link>
-          </li>
-        </ul>
+        <nav className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`}>
+          <Link
+            to="/"
+            onClick={handleLinkClick}
+            className={`nav-item ${isActive('/') ? 'active' : ''}`}
+          >
+            <Activity size={17} />
+            <span>Home</span>
+          </Link>
+
+          <Link
+            to="/training"
+            onClick={handleLinkClick}
+            className={`nav-item ${isActive('/training') ? 'active' : ''}`}
+          >
+            <Cpu size={17} />
+            <span>Training</span>
+          </Link>
+
+          <Link
+            to="/predict"
+            onClick={handleLinkClick}
+            className={`nav-item ${isActive('/predict') ? 'active' : ''}`}
+          >
+            <TrendingUp size={17} />
+            <span>Prediction</span>
+          </Link>
+
+          <Link
+            to="/about"
+            onClick={handleLinkClick}
+            className={`nav-item ${isActive('/about') ? 'active' : ''}`}
+          >
+            <Info size={17} />
+            <span>About</span>
+          </Link>
+        </nav>
       </div>
-    </nav>
+    </header>
   );
 }
 

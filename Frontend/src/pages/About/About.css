@@ -1,46 +1,71 @@
-.about-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: #f9fbfd;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .about-container h1 {
-    font-size: 2rem;
-    color: #1a237e;
-    margin-bottom: 1rem;
-  }
-  
-  .about-container h2 {
-    color: #0d47a1;
-    margin-top: 1.5rem;
-  }
-  
-  .about-container p {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #333;
-  }
-  
-  .features-list {
-    list-style-type: none;
-    padding-left: 0;
-    margin-top: 1rem;
-  }
-  
-  .features-list li {
-    padding: 0.5rem 0;
-    font-size: 1rem;
-    color: #37474f;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .note {
-    margin-top: 2rem;
-    font-style: italic;
-    color: #555;
-  }
-  
+.about-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.about-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.about-hero h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-green);
+}
+
+.architecture-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.spec-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.spec-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.65rem;
+}
+
+.spec-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.spec-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.spec-list strong {
+  color: var(--text-primary);
+}
+
+.disclaimer-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--color-green-light);
+  border: 1px solid rgba(0, 168, 107, 0.2);
+}
+
+.disclaimer-card h4 {
+  font-size: 0.95rem;
+  color: var(--color-green);
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}

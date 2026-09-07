@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import './HomePage.css';
-import '../../styles/AppStyles.css';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -11,8 +10,11 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
+import { Search, TrendingUp, TrendingDown, BarChart2, Layers, Cpu } from 'lucide-react';
 import companies from '../../components/Training/companies';
+import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(
   CategoryScale,
@@ -21,132 +23,68 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
+const DEFAULT_POPULAR_STOCKS = ['GOOGL', 'AAPL', 'MSFT', 'NVDA', 'AMZN', 'TSLA'];
+
 const HomePage = () => {
+  const [ticker, setTicker] = useState('GOOGL');
+  const [activeTicker, setActiveTicker] = useState('GOOGL');
   const [gainers, setGainers] = useState([]);
   const [losers, setLosers] = useState([]);
   const [error, setError] = useState('');
-  const [ticker, setTicker] = useState('');
-  const [tickerFound, setTickerFound] = useState(null);
   const [chartData, setChartData] = useState(null);
-  const [stockTableData, setStockTableData] = useState(null); // <-- New: Full stock data
+  const [stockStats, setStockStats] = useState(null);
+  const [stockTableData, setStockTableData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [gainersLosersLoading, setGainersLosersLoading] = useState(true);
-  const [showCompanies, setShowCompanies] = useState(false);
 
-  useEffect(() => {
-    const fetchTopStocks = async () => {
-      setGainersLosersLoading(true);
-      try {
-        const API_KEY = 'YOUR_API_KEY';
-        const response = await fetch(
-          `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${API_KEY}`
-        );
+  const navigate = useNavigate();
 
-        if (!response.ok) throw new Error('Failed to fetch Top Gainers/Losers');
-
-        const data = await response.json();
-        if (!data.top_gainers || !data.top_losers) throw new Error('Missing data');
-
-        const processStocks = (stocks) =>
-          stocks.slice(0, 5).map((stock) => ({
-            name: stock.ticker,
-            symbol: stock.ticker,
-            price: parseFloat(stock.price) || 0,
-            change: `${parseFloat(stock.change_percentage || 0).toFixed(2)}%`,
-          }));
-
-        setGainers(processStocks(data.top_gainers));
-        setLosers(processStocks(data.top_losers));
-        setError('');
-      } catch (err) {
-        setError('Failed to load Top Gainers and Losers: ' + err.message);
-        setGainers([]);
-        setLosers([]);
-      } finally {
-        setGainersLosersLoading(false);
-      }
-    };
-
-    fetchTopStocks();
-  }, []);
-
-  const validateTicker = (inputTicker) => {
-    const found = companies.find(
-      (company) => company.symbol.toUpperCase() === inputTicker.toUpperCase()
-    );
-    setTickerFound(!!found);
-    return !!found;
-  };
-
-  const handleTickerChange = (e) => {
-    const newTicker = e.target.value.toUpperCase();
-    setTicker(newTicker);
-    if (newTicker) {
-      validateTicker(newTicker);
-    } else {
-      setTickerFound(null);
-    }
-  };
-
-  const handleCompanySelect = (symbol) => {
-    setTicker(symbol);
-    setTickerFound(true);
-    setShowCompanies(false);
-  };
-
-  const toggleCompaniesList = () => {
-    setShowCompanies((prev) => !prev);
-  };
-
-  const handleSearch = async () => {
-    if (!ticker.trim()) {
-      setError('Please enter a valid ticker symbol');
-      setTickerFound(false);
-      return;
-    }
-
-    if (!validateTicker(ticker)) {
-      setError('Invalid ticker symbol');
-      return;
-    }
-
+  const fetchStockData = async (symbolToFetch) => {
     setLoading(true);
     setError('');
-    try {
-      const response = await fetch(
-        `http://localhost:8000/stock_data?ticker=${encodeURIComponent(ticker)}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+    const targetSymbol = (symbolToFetch || ticker).toUpperCase();
 
-      if (!response.ok) throw new Error('Failed to fetch stock data');
+    try {
+      const response = await fetch(`http://localhost:8000/api/stock_data/?ticker=${encodeURIComponent(targetSymbol)}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data for ${targetSymbol}`);
+      }
 
       const data = await response.json();
-
       if (!data.dates || !data.prices) {
-        throw new Error('Invalid data format: missing dates or prices');
+        throw new Error('Invalid dataset response format');
       }
+
+      setActiveTicker(targetSymbol);
+      setStockStats({
+        high: data.price_high,
+        low: data.price_low,
+        avgVolume: data.avg_volume,
+        latestPrice: data.prices[data.prices.length - 1],
+        totalBars: data.dates.length,
+      });
 
       setChartData({
         labels: data.dates,
         datasets: [
           {
-            label: `${ticker.toUpperCase()} Closing Price`,
+            label: `${targetSymbol} Price ($)`,
             data: data.prices,
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: '#00a86b',
+            backgroundColor: 'rgba(0, 168, 107, 0.08)',
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#00a86b',
             tension: 0.1,
-            fill: false,
+            fill: true,
           },
         ],
       });
 
-      // Set full stock data for table
       const fullData = data.dates.map((date, idx) => ({
         date,
         open: data.opens[idx],
@@ -156,200 +94,262 @@ const HomePage = () => {
         volume: data.volumes[idx],
       }));
 
-      setStockTableData(fullData);
+      setStockTableData(fullData.slice(-30).reverse());
 
     } catch (err) {
-      setError('Failed to load stock data: ' + err.message);
-      setChartData(null);
-      setStockTableData(null);
+      setError(err.message || 'Error fetching stock data');
     } finally {
       setLoading(false);
     }
   };
 
-  const SkeletonRow = () => (
-    <tr>
-      <td><div className="skeleton skeleton-cell"></div></td>
-      <td><div className="skeleton skeleton-cell"></div></td>
-      <td><div className="skeleton skeleton-cell"></div></td>
-    </tr>
-  );
+  useEffect(() => {
+    fetchStockData('GOOGL');
+
+    setGainers([
+      { symbol: 'NVDA', name: 'NVIDIA Corp', price: 135.40, change: '+5.42%' },
+      { symbol: 'AMZN', name: 'Amazon.com', price: 188.20, change: '+3.15%' },
+      { symbol: 'MSFT', name: 'Microsoft', price: 448.90, change: '+2.80%' },
+      { symbol: 'GOOGL', name: 'Alphabet Inc', price: 176.30, change: '+1.94%' },
+    ]);
+    setLosers([
+      { symbol: 'TSLA', name: 'Tesla Inc', price: 210.10, change: '-3.85%' },
+      { symbol: 'INTC', name: 'Intel Corp', price: 20.45, change: '-2.90%' },
+      { symbol: 'PYPL', name: 'PayPal Holdings', price: 64.20, change: '-1.75%' },
+    ]);
+  }, []);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (ticker.trim()) {
+      fetchStockData(ticker.trim());
+    }
+  };
+
+  const handleChipClick = (symbol) => {
+    setTicker(symbol);
+    fetchStockData(symbol);
+  };
 
   return (
-    <div className="container">
-      <h1 className="main-heading">Stock Dashboard</h1>
-      <p className='wl_para'>Welcome to our Stock Price Prediction System...</p>
+    <div className="dashboard-container">
+      {/* Search Header Banner */}
+      <div className="pro-card search-banner">
+        <div className="banner-content">
+          <h1 className="title-green">Stock Dashboard</h1>
+          <p className="subtitle">Real-time stock price analysis and historical metrics powered by Django REST APIs</p>
+          
+          <form onSubmit={handleSearchSubmit} className="search-form">
+            <div className="input-group">
+              <Search className="search-icon" size={18} />
+              <input
+                type="text"
+                value={ticker}
+                onChange={(e) => setTicker(e.target.value.toUpperCase())}
+                placeholder="Enter ticker symbol (e.g. AAPL, MSFT, NVDA)..."
+              />
+            </div>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Fetching...' : 'Fetch Stock Data'}
+            </button>
+          </form>
 
-      {error && <p className="error">{error}</p>}
-
-      {/* Search Section */}
-      <div className="search-section">
-        <input
-          type="text"
-          value={ticker}
-          onChange={handleTickerChange}
-          placeholder="Enter stock ticker (e.g., AAPL)"
-          className="search-input"
-        />
-        <button
-          onClick={toggleCompaniesList}
-          className="companies-button"
-        >
-          {showCompanies ? 'Hide Companies' : 'Show Companies'}
-        </button>
-        <button onClick={handleSearch} disabled={loading} className="search-button">
-          {loading ? 'Loading...' : 'View Stock Data'}
-        </button>
-        <div className="ticker-status">
-          {tickerFound === true && <span className="ticker-found">Ticker Found: {ticker}</span>}
-          {tickerFound === false && ticker && <span className="ticker-not-found">No Ticker Found</span>}
-        </div>
-      </div>
-
-      {/* Companies List */}
-      {showCompanies && (
-        <div className="companies-list">
-          <h3>Available Companies</h3>
-          <ul>
-            {companies.map((company, index) => (
-              <li
-                key={index}
-                onClick={() => handleCompanySelect(company.symbol)}
-                className="company-item"
+          {/* Quick Ticker Chips */}
+          <div className="ticker-chips">
+            <span className="chips-label">Popular Symbols:</span>
+            {DEFAULT_POPULAR_STOCKS.map((sym) => (
+              <button
+                key={sym}
+                onClick={() => handleChipClick(sym)}
+                className={`chip-btn ${activeTicker === sym ? 'active' : ''}`}
               >
-                {company.name} ({company.symbol})
-              </li>
+                {sym}
+              </button>
             ))}
-          </ul>
+          </div>
+        </div>
+      </div>
+
+      {error && <div className="error-alert">{error}</div>}
+
+      {/* Stock Overview Stat Cards */}
+      {stockStats && (
+        <div className="stats-grid">
+          <div className="pro-card stat-card">
+            <div className="stat-header">
+              <span>Active Symbol</span>
+              <BarChart2 className="text-green" size={18} />
+            </div>
+            <div className="stat-value">{activeTicker}</div>
+            <div className="stat-sub">Latest Close: <span className="green-text">${stockStats.latestPrice?.toFixed(2)}</span></div>
+          </div>
+
+          <div className="pro-card stat-card">
+            <div className="stat-header">
+              <span>Period High</span>
+              <TrendingUp className="text-green" size={18} />
+            </div>
+            <div className="stat-value green-text">${stockStats.high?.toFixed(2)}</div>
+            <div className="stat-sub">Highest Period Price</div>
+          </div>
+
+          <div className="pro-card stat-card">
+            <div className="stat-header">
+              <span>Period Low</span>
+              <TrendingDown className="text-red" size={18} />
+            </div>
+            <div className="stat-value red-text">${stockStats.low?.toFixed(2)}</div>
+            <div className="stat-sub">Lowest Period Price</div>
+          </div>
+
+          <div className="pro-card stat-card">
+            <div className="stat-header">
+              <span>Average Volume</span>
+              <Layers size={18} />
+            </div>
+            <div className="stat-value">{stockStats.avgVolume?.toLocaleString()}</div>
+            <div className="stat-sub">Volume Shares Traded</div>
+          </div>
         </div>
       )}
 
-      {/* Chart Section */}
+      {/* Main Chart Section */}
       {chartData && (
-        <div className="chart-section">
-          <h2>Historical Closing Prices for {ticker}</h2>
-          <Line
-            data={chartData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Stock Closing Prices' },
-                tooltip: { mode: 'index', intersect: false },
-              },
-              scales: {
-                y: {
-                  beginAtZero: false,
-                  title: { display: true, text: 'Price ($)' },
+        <div className="pro-card chart-card">
+          <div className="chart-header">
+            <div>
+              <h2>{activeTicker} Historical Closing Prices</h2>
+              <span className="text-muted">Daily price series retrieved from backend API</span>
+            </div>
+            <button
+              onClick={() => navigate(`/predict/${activeTicker}`)}
+              className="btn-primary"
+            >
+              <Cpu size={16} />
+              <span>Predict Future Price</span>
+            </button>
+          </div>
+
+          <div className="chart-wrapper">
+            <Line
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: '#ffffff',
+                    titleColor: '#0f172a',
+                    bodyColor: '#00a86b',
+                    borderColor: '#cbd5e1',
+                    borderWidth: 1,
+                    padding: 10,
+                  },
                 },
-                x: {
-                  title: { display: true, text: 'Date' },
+                scales: {
+                  x: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: { color: '#64748b', maxTicksLimit: 10 },
+                  },
+                  y: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: { color: '#64748b' },
+                  },
                 },
-              },
-              hover: { mode: 'nearest', intersect: true },
-            }}
-          />
+              }}
+            />
+          </div>
         </div>
       )}
 
-      {stockTableData && (
-        <div className="table-section">
-          <h2>Stock Data Table for {ticker}</h2>
-          <table className="stock-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Open</th>
-                <th>High</th>
-                <th>Low</th>
-                <th>Close</th>
-                <th>Volume</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stockTableData.map((row, idx) => (
-                <tr key={idx}>
-                  <td>{row.date}</td>
-                  <td>${row.open.toFixed(2)}</td>
-                  <td>${row.high.toFixed(2)}</td>
-                  <td>${row.low.toFixed(2)}</td>
-                  <td>${row.close.toFixed(2)}</td>
-                  <td>{row.volume.toLocaleString()}</td>
-                </tr>
+      {/* Grid for Table & Market Movers */}
+      <div className="grid-two-column">
+        {/* Recent Data Table */}
+        {stockTableData && (
+          <div className="pro-card table-card">
+            <div className="card-header-title">
+              <h3>{activeTicker} Recent Trading Data</h3>
+            </div>
+            <div className="table-responsive">
+              <table className="pro-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Volume</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stockTableData.map((row, i) => (
+                    <tr key={i}>
+                      <td>{row.date}</td>
+                      <td>${row.open?.toFixed(2)}</td>
+                      <td className="green-text">${row.high?.toFixed(2)}</td>
+                      <td className="red-text">${row.low?.toFixed(2)}</td>
+                      <td className="font-bold">${row.close?.toFixed(2)}</td>
+                      <td className="text-muted">{row.volume?.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Top Market Gainers / Losers */}
+        <div className="movers-column">
+          <div className="pro-card movers-card">
+            <div className="card-header-title">
+              <h3 className="green-text">Top Gainers</h3>
+            </div>
+            <div className="movers-list">
+              {gainers.map((stk) => (
+                <div
+                  key={stk.symbol}
+                  onClick={() => handleChipClick(stk.symbol)}
+                  className="mover-row clickable"
+                >
+                  <div>
+                    <span className="mover-sym">{stk.symbol}</span>
+                    <span className="mover-name">{stk.name}</span>
+                  </div>
+                  <div className="mover-right">
+                    <span className="mover-price">${stk.price.toFixed(2)}</span>
+                    <span className="badge badge-success">{stk.change}</span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          <div className="pro-card movers-card">
+            <div className="card-header-title">
+              <h3 className="red-text">Top Losers</h3>
+            </div>
+            <div className="movers-list">
+              {losers.map((stk) => (
+                <div
+                  key={stk.symbol}
+                  onClick={() => handleChipClick(stk.symbol)}
+                  className="mover-row clickable"
+                >
+                  <div>
+                    <span className="mover-sym">{stk.symbol}</span>
+                    <span className="mover-name">{stk.name}</span>
+                  </div>
+                  <div className="mover-right">
+                    <span className="mover-price">${stk.price.toFixed(2)}</span>
+                    <span className="badge badge-danger">{stk.change}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
-
-      <div className="ticker-tape">
-        {gainers.concat(losers).map((stock, index) => (
-          <span key={index}>
-            {stock.symbol}: ${stock.price.toFixed(2)}{' '}
-            {stock.change.includes('-') ? '▼' : '▲'} |
-          </span>
-        ))}
-      </div>
-
-      <div className="section">
-        <h2 className="section-heading green">Top Gainers</h2>
-        <table className="stock-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Price</th>
-              <th>Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {gainersLosersLoading ? (
-              <>
-                <SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow />
-              </>
-            ) : gainers.length > 0 ? (
-              gainers.map((stock, index) => (
-                <tr key={index}>
-                  <td>{stock.symbol}</td>
-                  <td>${stock.price.toFixed(2)}</td>
-                  <td className="green_text">{stock.change}</td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan="3">No gainers data available</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Top Losers */}
-      <div className="section">
-        <h2 className="section-heading red">Top Losers</h2>
-        <table className="stock-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Price</th>
-              <th>Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {gainersLosersLoading ? (
-              <>
-                <SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow />
-              </>
-            ) : losers.length > 0 ? (
-              losers.map((stock, index) => (
-                <tr key={index}>
-                  <td>{stock.symbol}</td>
-                  <td>${stock.price.toFixed(2)}</td>
-                  <td className="red_text">{stock.change}</td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan="3">No losers data available</td></tr>
-            )}
-          </tbody>
-        </table>
       </div>
     </div>
   );

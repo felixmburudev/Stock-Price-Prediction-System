@@ -1,52 +1,80 @@
 import React from 'react';
+import { ShieldCheck, Cpu, Lock, Server, Globe } from 'lucide-react';
 import './About.css';
 
 const About = () => {
   return (
-    <div className="about-container">
-      <h1>About the Stock Price Prediction Systkjhghvem</h1>
-      <p>
-        The Stock Price Prediction System is a modern web application designed to help investors, researchers, and financial enthusiasts
-        make informed decisions by leveraging machine learning to predict future stock prices. Developed using a full-stack approach, the
-        system combines the robust capabilities of Django on the backend with the dynamic and responsive UI features of React on the frontend.
-      </p>
+    <div className="about-page-container">
+      <div className="pro-card about-hero">
+        <h1 className="title-green">About the System</h1>
+        <p className="subtitle">
+          Stock Price Prediction System built with Django REST Framework (DRF) on the backend and React on the frontend.
+        </p>
+      </div>
 
-      <p>
-        At the core of the system is a trained machine learning model—specifically, a Random Forest Regressor—that analyzes historical stock data 
-        to forecast future price movements. By inputting a valid stock ticker symbol, users can access real-time predictions based on previously 
-        learned market patterns. This makes the system highly generalizable and adaptable to any publicly traded company, moving beyond 
-        company-specific limitations and providing a scalable, practical tool for a wide variety of financial analysis needs.
-      </p>
+      <div className="architecture-grid">
+        <div className="pro-card spec-card">
+          <div className="spec-header">
+            <Server className="text-green" size={22} />
+            <h3>Django REST Framework (DRF)</h3>
+          </div>
+          <ul className="spec-list">
+            <li><strong>Backend Framework:</strong> Django REST Framework (DRF)</li>
+            <li><strong>Security:</strong> HTTPS redirection & CSRF security settings</li>
+            <li><strong>Rate Limiting:</strong> IP address request throttling (`120/min` per IP)</li>
+            <li><strong>API Structure:</strong> DRF ViewSets & REST API endpoints</li>
+          </ul>
+        </div>
 
-      <p>
-        The platform is designed with accessibility and usability in mind. Whether you're a beginner investor looking to explore market patterns 
-        or an experienced analyst testing automated forecasting tools, this system offers an intuitive interface that makes complex computations 
-        accessible in just a few clicks. The integration of Django REST APIs ensures that data retrieval and prediction are efficient and secure, 
-        while React delivers a smooth and fast front-end experience with real-time updates and clean visualization.
-      </p>
+        <div className="pro-card spec-card">
+          <div className="spec-header">
+            <Cpu className="text-green" size={22} />
+            <h3>Machine Learning Model</h3>
+          </div>
+          <ul className="spec-list">
+            <li><strong>Model Type:</strong> Random Forest Classifier / Regressor</li>
+            <li><strong>Features:</strong> SMA (20), SMA (50), RSI (14), Lag 1 & Lag 2 returns</li>
+            <li><strong>Persistence:</strong> Joblib model serialization</li>
+            <li><strong>Training:</strong> Single and batch model training workflows</li>
+          </ul>
+        </div>
 
-      <p>
-        In an era where financial data is vast, fast-changing, and difficult to interpret manually, machine learning provides a solution that 
-        is not only fast but also adaptive. This project stands at the intersection of finance, data science, and software engineering, 
-        demonstrating how technology can transform traditional industries and support smarter decision-making in investment management.
-      </p>
+        <div className="pro-card spec-card">
+          <div className="spec-header">
+            <Globe className="text-green" size={22} />
+            <h3>Frontend Terminal</h3>
+          </div>
+          <ul className="spec-list">
+            <li><strong>Framework:</strong> React + Vite</li>
+            <li><strong>Design System:</strong> Clean White & Green Professional Theme</li>
+            <li><strong>Data Visualization:</strong> Chart.js canvas charting</li>
+            <li><strong>Icons:</strong> Lucide React Vector Icons</li>
+          </ul>
+        </div>
 
-      <h2>Key Features</h2>
-      <ul className="features-list">
-        <li>🔍 Predict stock prices using machine learning (Random Forest model).</li>
-        <li>📊 Analyze historical stock data in a clean, interactive format.</li>
-        <li>📈 Visualize both past performance and future trends.</li>
-        <li>⚙️ Robust Django backend handling data logic and prediction processes.</li>
-        <li>💻 Responsive React frontend for a seamless user experience.</li>
-        <li>🔄 Real-time data fetching through user input (ticker symbols).</li>
-        <li>🌐 Support for any public stock — not limited to one company or industry.</li>
-        <li>🔐 Scalable architecture ready for API expansion and user authentication features.</li>
-      </ul>
+        <div className="pro-card spec-card">
+          <div className="spec-header">
+            <Lock className="text-green" size={22} />
+            <h3>Security & Settings</h3>
+          </div>
+          <ul className="spec-list">
+            <li><strong>Throttling:</strong> DRF `AnonRateThrottle` & `UserRateThrottle`</li>
+            <li><strong>HTTPS Headers:</strong> Strict-Transport-Security (HSTS 1 year)</li>
+            <li><strong>Sniffing Protection:</strong> `X-Content-Type-Options: nosniff`</li>
+            <li><strong>Clickjacking:</strong> `X-Frame-Options: DENY`</li>
+          </ul>
+        </div>
+      </div>
 
-      <p className="note">
-        Disclaimer: This system is designed primarily for educational and research purposes. While machine learning can enhance financial forecasting, 
-        predictions may not always be accurate due to market unpredictability. Users are encouraged to consult professional financial advisors before making investment decisions.
-      </p>
+      <div className="pro-card disclaimer-card">
+        <ShieldCheck className="text-green" size={22} />
+        <div>
+          <h4>System Disclaimer</h4>
+          <p className="text-muted">
+            This application is designed for educational and research purposes. Stock price predictions are generated by machine learning models and should not be considered financial advice.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

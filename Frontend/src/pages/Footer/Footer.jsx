@@ -1,16 +1,28 @@
 import React from 'react';
+import { Globe, Activity } from 'lucide-react';
 import './Footer.css';
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <p>&copy; {new Date().getFullYear()} Stock Price Prediction System. All rights reserved.</p>
-      <div className="footer-links">
-        <a href="/about">About</a>
-        <a href="https://github.com/felixmburudev/Safaricom-Stock-Price-Prediction-System/" target="_blank" rel="noopener noreferrer">
-          GitHub
-        </a>
-        <a href="/contact">Contact</a>
+    <footer className="footer-bar">
+      <div className="footer-content">
+        <div className="footer-left">
+          <Activity size={16} className="text-green" />
+          <span>Stock Price Prediction System &copy; {new Date().getFullYear()}</span>
+        </div>
+
+        <div className="footer-right">
+          <span className="badge badge-success">DRF Security Active</span>
+          <a
+            href="https://github.com/felixmburudev/Safaricom-Stock-Price-Prediction-System/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            <Globe size={15} />
+            <span>GitHub Repository</span>
+          </a>
+        </div>
       </div>
     </footer>
   );
